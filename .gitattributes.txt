@@ -1,4 +1,0 @@
-text eol=crlf
-*.py text
-*.pyt text
-

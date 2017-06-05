@@ -3,7 +3,7 @@ import arcpy, csv, os, csv_header_modifier as csv_mdf
 from arcpy import env
 
 # user settings
-data_dir = "C:\projects\D4_Apps\GIS_Tool\GIS_Tool\Data"
+data_dir = "C:\projects\D4_Apps\SERPM_Input_Editor\Data"
 
 working_gdb_filename = "Defualt.gdb"
 taz_dir = "TAZshape"
@@ -79,7 +79,7 @@ csv_files = [taz_2010_datafile, taz_2015_datafile, taz_2040_datafile]
 
 for f in xrange(len(csv_files)):
     # csv_mdf.append_year_to_fieldnames(os.path.join(data_dir,csv_files[f]), years[f])
-    remove_year_from_fieldnames(os.path.join(data_dir,csv_files[f]), csv_years[f])
+    csv_mdf.remove_year_from_fieldnames(os.path.join(data_dir,csv_files[f]), csv_years[f])
 
 # arcpy.SelectLayerByAttribute_management(layer_name, 'NEW_SELECTION'," [TAZ_REG] > 0 ", )    
 # arcpy.MakeTableView_management(tazFeatureClass, 'edit_'+layer_name, "", "", fieldinfo)

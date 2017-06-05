@@ -1,11 +1,13 @@
-import arcpy, csv, os, csv_header_modifier as csv_mdf
+import arcpy, csv, os, SUITE_functions as sf
 
 from arcpy import env
 
-# user settings
-data_dir = "C:\projects\D4_Apps\GIS_Tool\GIS_Tool\Data"
+################################################################################
+#  User settings
+################################################################################
+data_dir = "C:\projects\D4_Apps\SERPM_Input_Editor\Data"
 
-working_gdb_filename = "Default.gdb"
+working_gdb_filename = "Default2.gdb"
 taz_dir = "TAZshape"
 maz_dir = "MAZshape"
 taz_shape_filename = "SERPM7TAZ_NAD83_11152011.shp"
@@ -20,7 +22,52 @@ temp_2015_tazfile = "popSynInputs\\taz_2015.csv"
 temp_2040_tazfile = "popSynInputs\\taz_2040.csv"
 years = [2010, 2015, 2040]
 
+################################################################################
+#  Import TAZ shape and csv files to geodatabase
+################################################################################
+# data_dir = parameters[0].valueAsText
+# working_gdb_filename = parameters[1].valueAsText
 
+arcpy.env.workspace = data_dir
+
+# 1. Create a gdb
+working_gdb = sf.create_gdb(data_dir, working_gdb_filename)
+
+# 2. Import TAZ files to geodatabase
+MAZ_shp = os.path.join(maz_dir, maz_shape_filename)
+TAZ_shp = os.path.join(taz_dir, taz_shape_filename)
+fcList = [TAZ_shp, MAZ_shp]
+
+for shapefile in fcList:
+    sf.import_shapefile_to_gdb(shapefile, working_gdb)
+
+# 3. Append TAZ csv fields with YEAR suffix
+csv_files = [taz_2010_datafile, taz_2015_datafile, taz_2040_datafile]
+temp_dataList = []
+
+for f in xrange(len(csv_files)):
+    tempfilename = sf.append_year_to_fieldnames(os.path.join(data_dir, csv_files[f]), years[f])
+    temp_dataList.append(tempfilename)
+
+# 4. Join TAZ data to TAZ shape file
+for t in xrange(len(temp_dataList)):
+
+    # Convert taz csv file to object class (add "t-" to avoid numeric start)
+    tazfile = temp_dataList[t]
+    out_TAZ_Data = sf.Convert_csv_to_GDBObject(working_gdb, tazfile)
+
+    if (t == 0):
+        arcpy.MakeFeatureLayer_management(TAZ_shp, "tazLyr")
+    arcpy.AddJoin_management("tazLyr", "TAZ_REG", os.path.join(data_dir,tazfile), "TAZ_REG_"+str(years[t])) 
+
+    # Join TAZ table to shapefile in Geodatabase
+    # tazFeatureClass = sf.join_table_to_shape(working_gdb, TAZ_shp, out_TAZ_Data, "TAZ_REG", "TAZ_REG_"+str(years[t]))
+    arcpy.RefreshActiveView()
+    arcpy.RefreshTOC()
+
+arcpy.FeatureClassToFeatureClass_conversion("tazLyr", working_gdb, "taz")
+
+'''
 ################################################################################
 #   STEP - 1: Create Geodatabase and copy shape files
 ################################################################################
@@ -98,4 +145,4 @@ for t in xrange(len(taz_dataList)):
 
     # Join data
     arcpy.JoinField_management(tazFeatureClass,"TAZ_REG", out_TAZ_Data, "TAZ_REG_"+str(years[t]))
-
+'''
