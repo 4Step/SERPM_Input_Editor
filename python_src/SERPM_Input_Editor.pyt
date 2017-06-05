@@ -1,6 +1,7 @@
 import arcpy, os, SUITE_functions as sf
+import arcpy.mapping
 from arcpy import env
-
+arcpy.env.overwriteOutput = True
 # ======================================================================================================================
 # Toolbox Design
 class Toolbox(object):
@@ -173,14 +174,13 @@ class b1_Import(object):
         # Add joined shape file to Geodatabase
         arcpy.FeatureClassToFeatureClass_conversion("tazLyr", working_gdb, "taz")
 
-        # mxd = arcpy.mapping.MapDocument("CURRENT")
-        # dataFrame = arcpy.mapping.ListDataFrames(mxd, "*")[0]
-        # newlayer = arcpy.mapping.Layer(TAZ_shp)  
-        # arcpy.mapping.AddLayer(dataFrame, "tazLyr","BOTTOM")
+        # Save joined geodatabase to a Arc Map Document
+        mxd_path  = os.path.join(data_dir, "SERPM_GIS_Tool_Template.mxd")
+        newmxd_path = os.path.join(data_dir, "SERPM_GIS_Tool.mxd")
+        
+        tazlyr = os.path.join(working_gdb,"taz")
+        sf.open_map_document(tazlyr, mxd_path, newmxd_path)
 
-        # arcpy.mapping.Layer(layerfile)
-        arcpy.RefreshActiveView()
-        arcpy.RefreshTOC()
         return
 
 # ======================================================================================================================

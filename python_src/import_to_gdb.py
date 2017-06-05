@@ -67,6 +67,23 @@ for t in xrange(len(temp_dataList)):
 
 arcpy.FeatureClassToFeatureClass_conversion("tazLyr", working_gdb, "taz")
 
+# Write to MXD and open the MXD file
+mxd_path = os.path.join(data_dir, "SERPM_GIS_Tool_Template.mxd")
+newmxd_path = os.path.join(data_dir, "SERPM_GIS_Tool.mxd")
+
+mxd = arcpy.mapping.MapDocument(mxd_path)
+newlayer = arcpy.mapping.Layer(os.path.join(working_gdb,"taz"))
+dataFrame = arcpy.mapping.ListDataFrames(mxd)[0]
+arcpy.mapping.AddLayer(dataFrame, newlayer, "BOTTOM")
+
+if os.path.exists(newmxd_path):
+    os.remove(newmxd_path)
+    
+mxd.saveACopy(newmxd_path)
+mxd = arcpy.mapping.MapDocument(newmxd_path)
+arcpy.RefreshActiveView()
+arcpy.RefreshTOC()
+del mxd
 '''
 ################################################################################
 #   STEP - 1: Create Geodatabase and copy shape files

@@ -136,3 +136,19 @@ def join_table_to_shape(working_gdb, TAZ_shp, out_TAZ_Data, join_field_A, join_f
     # Join data
     arcpy.JoinField_management(tazFeatureClass, join_field_A, out_TAZ_Data, join_field_B)
     return(tazFeatureClass)
+    
+###############################################################################
+# Function to save layer to geodatabase and open the document
+def open_map_document(tazlyr, mxd_template, mxd_output):
+    mxd = arcpy.mapping.MapDocument(mxd_template)
+    newlayer = arcpy.mapping.Layer(tazlyr)
+    dataFrame = arcpy.mapping.ListDataFrames(mxd)[0]
+    arcpy.mapping.AddLayer(dataFrame, newlayer, "BOTTOM")
+
+    if os.path.exists(mxd_output):
+        os.remove(mxd_output)
+
+    mxd.saveACopy(mxd_output)
+    mxd = arcpy.mapping.MapDocument(mxd_output)
+    arcpy.RefreshActiveView()
+    arcpy.RefreshTOC()
